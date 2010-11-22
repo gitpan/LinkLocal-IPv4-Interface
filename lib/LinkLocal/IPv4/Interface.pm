@@ -136,7 +136,7 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 NAME
 
-LinkLocal::IPv4::Interface - Moose-based network interface object wrapper
+LinkLocal::IPv4::Interface - IPv4 Link-Local network interface wrapper
 
 =head1 SYNOPSIS
 
@@ -152,7 +152,11 @@ unmanaged IP networks. Based upon IETF standard RFC 3927, LinkLocal::IPv4::Inter
 provides a simple and lightweight framework for dynamic configuration of network 
 interfaces with IPv4 Link-Local addresses. 
 
-# TODO Add additional/proper POD
+TODO Add additional/proper POD
+
+NOTE This is thread bare and still rather useless I am afraid. I am currently de-crufting
+a couple of additional modules which provide further function and those will be added
+very soon.
 
 =head2 ATTRIBUTES
 
