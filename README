@@ -23,8 +23,7 @@ This module requires these other modules and libraries:
   Moose::Util::TypeConstraints
   IO::Interface::Simple
   Regexp::Common
-  Net::Frame::Layer::ARP
-  
+
 COPYRIGHT AND LICENCE
 
 Copyright (C) 2010 Ray Mroz
