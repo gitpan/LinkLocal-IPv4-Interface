@@ -58,7 +58,7 @@ has 'address_list' => (
     isa      => 'ArrayRef[IpAddress]',
     reader   => '_get_address_list',
     builder  => '_build_address_list',
-	lazy     => 1,
+    lazy     => 1,
     init_arg => undef,
 );
 
@@ -94,7 +94,7 @@ sub _build_address_list {
     # Seed for pseudo-random address generation
     srand($seed);
 
-    # Create a list of 10 pseudo-random Link-Local addresses
+    # Create a list of 10 pseudo-random link-local addresses
     my @llv4_ip_list = ();
     for ( my $iter = 0 ; $iter < 10 ; $iter++ ) {
         $llv4_ip_list[$iter] =
@@ -130,7 +130,7 @@ __PACKAGE__->meta->make_immutable;
 
 =head1 NAME
 
-LinkLocal::IPv4::Interface - Moose-based network interface object wrapper
+LinkLocal::IPv4::Interface - IPv4 link-local interface wrapper
 
 =head1 SYNOPSIS
 
@@ -144,18 +144,18 @@ LinkLocal::IPv4::Interface - Moose-based network interface object wrapper
 =head1 DESCRIPTION
 
 This package represents a lightweight, pure Perl implementation of the specification
-as outlined in F<RFC-3927>, I<Dynamic Configuration of IPv4 Link-Local Addresses>.
+as outlined in RFC-3927, I<Dynamic Configuration of IPv4 Link-Local Addresses>.
 This standard details a mechanism which provides a means of enabling automatic IPv4
-address allocations to network addressible entities and devices which by happenstance
+address allocations to network addressable entities and devices which by happenstance
 or design find themselves on an unmanaged, ad hoc IP network with no other means of
-aquiring a fully routable, unicast IPv4 address. As the name implies, link-local IPv4
-addresses are non-routable with all participating devices connected to the same physical
-link; this fact all but dictates that such networks are typically small. Home networks or
-other such small environments are well suited to the deployment of this standard. While 
-there are, in theory, upwards of 65,024 addresses available in the range for allocations,
-the reality is that as more addresses from the reserved range are allocated to hosts on
-the local link the number of collisions necessarily increases as well which degrades 
-overall performance. Products such as QIP meet this need in the enterprise.
+acquiring a fully routable, unicast IPv4 address. As the name implies, link-local IPv4
+addresses are non-routable in the IANA reserved C<169.254/16> prefix, with all participating
+devices connected to the same physical link; this fact all but dictates that such networks 
+are typically small. Home networks or other such small environments are well suited to the 
+deployment of this standard. While there are, in theory, upwards of 65,024 addresses available
+in the range for allocations, the reality is that as more addresses from the reserved range 
+are allocated to hosts on the local link the number of collisions necessarily increases as 
+well which degrades overall performance. Products such as QIP meet this need in the enterprise.
 
 This standard is widely implemented in most major operating systems, most of which "more 
 or less" adhere to this specification. While I have remained true to the specification
@@ -180,7 +180,7 @@ no assumptions about the current state of the interface at any time. Client code
 know this. The specification is quite clear that IPv4 link-local addresses are to be used
 only in the absence of a fully routable IPv4 address. The dynamic configuration of an
 IPv4 link-local address is to never interfere with the operation of any of the other
-processes whereby a host can aquire a standard, routable address such as a DHCP state
+processes whereby a host can acquire a standard, routable address such as a DHCP state
 machine or static assignments under the direction of a network administrator. This 
 implementation is B<only> to be used at such a time that a determination has been made that
 there are no operable and routable addresses configured on the interface. This library
@@ -188,7 +188,7 @@ does not at any time make any assumptions about the operability of any addresses
 to any interfaces on the host, nor does it in any way attempt to determine the management
 status of any network in which it participates. This is an important point to consider here 
 as small networks have become ubiquitous and "network hopping" with portable devices is 
-certainly a scenario that is much more common today than it was ten or even years ago.
+certainly a scenario that is much more common today than it was ten or even five years ago.
 Secondly, the configuration of an IPv4 link-local address is not something which is a
 static thing; the implementation does not just probe the local physical link for the
 address, configure the interface and forget about it. At any time an address conflict may
@@ -313,7 +313,7 @@ General gateway method to this framework. A call to if_config begins the process
 dynamically configuring the specified interface with an IPv4 link-local address. This 
 call initiates the process of checking the link-local address cache for the last successfully
 configured address otherwise a list of ten, new pseudo-random generated addresses is
-created. The implementation fully adheres to the specification as defined in F<RFC-3927>
+created. The implementation fully adheres to the specification as defined in RFC-3927
 as it ARP Probes the first address in the list or from the cache to determine if it is
 already in use elsewhere on the local link. If it gets no response to its probe packets,
 it configures the interface with the address and sends ARP Announce packets announcing
@@ -341,7 +341,7 @@ state.
 
 =head1 SEE ALSO
 
-Refer to F<RFC-3927>, I<Dynamic Configuration of IPv4 Link-Local Adresses>, the complete
+Refer to RFC-3927, I<Dynamic Configuration of IPv4 link-local Adresses>, the complete
 text of which can be found in the top level of the package archive.
 
 L<perl>, L<IO::Interface::Simple>, L<Moose>

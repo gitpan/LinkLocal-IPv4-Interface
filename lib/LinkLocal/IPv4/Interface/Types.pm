@@ -19,33 +19,52 @@ require 5.010000;
 
 use Moose;
 use Moose::Util::TypeConstraints;
-use Regexp::Common qw/net/;
+use Regexp::Common qw/ net pattern /;
 use Net::Frame::Layer::ARP qw/:consts/;
 use IO::Interface::Simple;
 
 subtype 'ArpPacket' 
-	=> as class_type('Net::Frame::Layer::ARP');
+    => as class_type('Net::Frame::Layer::ARP');
 
 coerce 'ArpPacket' 
-	=> from 'HashRef' 
-	=> via { Net::Frame::Layer::ARP->new( %{$_} ) };
+    => from 'HashRef' 
+    => via { Net::Frame::Layer::ARP->new( %{$_} ) };
 
 subtype 'LinkLocalInterface' 
-	=> as class_type('IO::Interface::Simple');
+    => as class_type('IO::Interface::Simple');
 
 coerce 'LinkLocalInterface' 
-	=> from 'Str' 
-	=> via { IO::Interface::Simple->new($_) };
+    => from 'Str' 
+    => via { IO::Interface::Simple->new($_) };
 
 subtype 'IpAddress' 
-	=> as 'Str' 
-	=> where { /^$RE{net}{IPv4}/ } 
-	=> message { "$_: Invalid IPv4 address format." };
-	
-subtype 'LinkLocalAddress'
-	=> as 'IpAddress'
-	=> where { /^/ }
-	=> message { "$_: Invalid IPv4 Link-Local Address" };
+    => as 'Str' 
+    => where { /^$RE{net}{IPv4}/ } 
+    => message { "$_: Invalid IPv4 address format." };
+
+subtype 'LinkLocalAddress' 
+    => as 'IpAddress' 
+    => where { /^$RE{net}{linklocal}/ } 
+    => message { "$_: Invalid IPv4 Link-Local Address" };
+
+# Custom Regexp::Common extension for link-local address pattern
+
+#====================================================================
+# FIXME:2010-12-01: Investigate why this custom extension to 
+# the Regexp::Common module is not matching on the last two octets
+#====================================================================
+
+my %LLoctet   = (
+    dec => q{(?k:25[0-5]|2[0-4][0-9]|[0-1]?[0-9]{1,2})},
+);
+
+my $LLprefix = '169.254';
+my $IPsep = '[.]';
+
+pattern(
+    name   => [qw (net linklocal)],
+    create => "($LLprefix$IPsep$LLoctet{dec}$IPsep$LLoctet{dec})",
+);
 
 no Moose;
 
@@ -99,7 +118,7 @@ access to them on a project wide scope (see L<Moose::Manual::BestPractices>).
 
 From base type C<Object>, C<isa> C<Net::Frame::Layer::ARP>. ArpPacket provides the basis for both
 ARP Probes and Announce messages, both of which are required in the implementation of
-F<RFC-3927>.
+RFC-3927.
 
 =item C<LinkLocalInterface>
 
@@ -115,7 +134,7 @@ notation addresses.
 =item C<LinkLocalAddress>
 
 From base type C<IpAddress>, this type provides for a type constraint for IPv4 dotted-decimal
-notation addresses as is specified in F<RFC-3927>; The prefix C<169.254/16> is reserved by IANA for
+notation addresses as is specified in RFC-3927; The prefix C<169.254/16> is reserved by IANA for
 the exclusive use of link-local address allocation (noting that the first 256 and last 256 
 addresses in the C<169.254/16> prefix are reserved for future use and B<MUST NOT> be selected by 
 a host using this dynamic configuration mechanism).
@@ -140,7 +159,7 @@ type C<IO::Interface::Simple>.
 
 =head1 SEE ALSO
 
-Refer to F<RFC-3927>, I<Dynamic Configuration of IPv4 Link-Local Adresses>, the complete
+Refer to RFC-3927, I<Dynamic Configuration of IPv4 Link-Local Adresses>, the complete
 text of which can be found in the top level of the package archive.
 
 L<perl>, L<Net::Frame::Layer::ARP>, L<IO::Interface::Simple>, L<Regexp::Common>, L<Moose>
