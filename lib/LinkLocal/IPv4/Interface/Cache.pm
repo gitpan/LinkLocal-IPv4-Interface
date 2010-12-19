@@ -1,6 +1,8 @@
 package LinkLocal::IPv4::Interface::Cache;
 
-require 5.010000;
+our $VERSION = '0.16';
+
+require 5.010_000;
 
 # Copyright (C) 2010 Raymond Mroz, Tony Li Xu
 #
@@ -160,7 +162,15 @@ LinkLocal::IPv4::Interface::Cache - IPv4 link-local address caching object.
 
   use LinkLocal::IPv4::Interface::Cache;
 
-
+  # Create a cache file object
+  my $cache = LinkLocal::IPv4::Interface::Cache->new();
+  
+  # Get the last IP cached for a given interface
+  my $last_address = $cache->get_last_ip('eth0');
+  
+  # Update the cache when an interface has successfully
+  # configured a link-local address
+  $cache->cache_this_ip( 'eth0', '169.254.100.150' );
 
 =head1 DESCRIPTION
 
@@ -213,7 +223,8 @@ interface, on the system.
 
 get_last_ip() is a public method which takes one argument, a network interface device name 
 (such as 'eth0' for example) and it returns the last successfully configured IPv4 link-local address
-which was configured on that interface. L<MooseX::Params::Validate> is in effect on all arguments.
+which was configured on that interface or undef if this interface has never been dynamically
+configured with a link-local address. L<MooseX::Params::Validate> is in effect on all arguments.
 
 =item C<cache_this_ip>
 
@@ -270,6 +281,10 @@ L<Try::Tiny>, L<Moose>
 
 This project is also hosted on github at:
 	git@github.com:raymroz/LinkLocal--IPv4.git
+
+=head1 BUGS
+
+What's a bug???
 
 =head1 AUTHOR
 
