@@ -1,207 +1,362 @@
-commit a07df83cc464ec826dd867506e3efbb185b0037e
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Tue Nov 30 22:05:55 2010 -0400
+commit 72d3cb2fea726d1e9655803a08f2df67a0ededd3
+Author: Ray Mroz <mroz@cpan.org>
+Date:   Tue Dec 21 04:32:36 2010 -0400
 
-    Removed some debug prints, two includes and updated POD.
+    Some cleaning up, checking in version 0.17
 
- lib/LinkLocal/IPv4/Interface/Cache.pm |   13 ++++---------
- lib/LinkLocal/IPv4/Interface/Types.pm |    2 +-
- 2 files changed, 5 insertions(+), 10 deletions(-)
+diff --git a/MANIFEST b/MANIFEST
+index 2a2d4e2..1b2abff 100644
+--- a/MANIFEST
++++ b/MANIFEST
+@@ -1,6 +1,13 @@
+ Changes
++GPL.txt
+ Makefile.PL
+ MANIFEST
+ README
++RFC3927.txt
+ t/LinkLocal-IPv4-Interface.t
+ lib/LinkLocal/IPv4/Interface.pm
++lib/LinkLocal/IPv4/Interface/ARP.pm
++lib/LinkLocal/IPv4/Interface/Cache.pm
++lib/LinkLocal/IPv4/Interface/Constants.pm
++lib/LinkLocal/IPv4/Interface/Logger.pm
++lib/LinkLocal/IPv4/Interface/Types.pm
+\ No newline at end of file
+diff --git a/README b/README
+index 46b94a6..73b0284 100644
+--- a/README
++++ b/README
+@@ -1,4 +1,4 @@
+-LinkLocal-IPv4-Interface version 0.16
++LinkLocal-IPv4-Interface version 0.17
+ =====================================
+ 
+ This package represents a lightweight, pure Perl implementation of the specification
+diff --git a/lib/LinkLocal/IPv4/Interface.pm b/lib/LinkLocal/IPv4/Interface.pm
+index a0fcb92..dfaf280 100644
+--- a/lib/LinkLocal/IPv4/Interface.pm
++++ b/lib/LinkLocal/IPv4/Interface.pm
+@@ -1,6 +1,6 @@
+ package LinkLocal::IPv4::Interface;
+ 
+-our $VERSION = '0.16';
++our $VERSION = '0.17';
+ 
+ require 5.010_000;
+ 
+diff --git a/lib/LinkLocal/IPv4/Interface/ARP.pm b/lib/LinkLocal/IPv4/Interface/ARP.pm
+index 639a480..9e35a8c 100644
+--- a/lib/LinkLocal/IPv4/Interface/ARP.pm
++++ b/lib/LinkLocal/IPv4/Interface/ARP.pm
+@@ -1,6 +1,6 @@
+ package LinkLocal::IPv4::Interface::ARP;
+ 
+-our $VERSION = '0.16';
++our $VERSION = '0.17';
+ 
+ require 5.010_000;
+ 
+@@ -22,7 +22,14 @@ require 5.010_000;
+ use Moose;
+ use Moose::Util::TypeConstraints;
+ use LinkLocal::IPv4::Interface::Types;
++
++use Net::Frame::Layer::ETH qw(:consts);
+ use Net::Frame::Simple;
++use Net::Frame::Dump::Online;
++use Net::Frame::Device;
++use Net::Write::Layer2;
++use Net::Netmask;
++
+ 
+ # ==========
+ # = packet =
+@@ -42,6 +49,7 @@ has 'packet' => (
+     coerce => 1,
+ );
+ 
++
+ sub send {
+     my $this = shift;
+     # TODO Handle send, packet object will be passed into a "sender machine"
+@@ -55,8 +63,7 @@ __PACKAGE__->meta->make_immutable;
+ =head1 NAME
+ 
+ LinkLocal::IPv4::Interface::ARP - An ARP packet wrapper, this class allows for the easy construction
+-of either Probe or Announce ARP Requests, both of which are central to dynamic link-local address
+-configuration.
++of either link-local Probe or Announce ARP Requests.
+ 
+ =head1 SYNOPSIS
+ 
+diff --git a/lib/LinkLocal/IPv4/Interface/Cache.pm b/lib/LinkLocal/IPv4/Interface/Cache.pm
+index ef14793..ea021c3 100644
+--- a/lib/LinkLocal/IPv4/Interface/Cache.pm
++++ b/lib/LinkLocal/IPv4/Interface/Cache.pm
+@@ -1,6 +1,6 @@
+ package LinkLocal::IPv4::Interface::Cache;
+ 
+-our $VERSION = '0.16';
++our $VERSION = '0.17';
+ 
+ require 5.010_000;
+ 
+@@ -46,7 +46,6 @@ sub _build_cache {
+     my $filename;    # Cache file name
+ 
+     try {
+-
+         # Determine the file name based on OS
+         given ($^O) {
+             when ( m/linux/ || m/bsd/ ) {    # Linux || (Free|Open|Net)BSD
+@@ -67,7 +66,7 @@ sub _build_cache {
+         }
+ 
+         # Create IO::File object and return
+-        return new IO::File( "$filename", O_RDWR | O_CREAT );
++        return new IO::File( $filename, O_RDWR | O_CREAT );
+     }
+     catch {
+         die "Error while opening cache file: $!";
+diff --git a/lib/LinkLocal/IPv4/Interface/Constants.pm b/lib/LinkLocal/IPv4/Interface/Constants.pm
+index a476e45..38ddeae 100644
+--- a/lib/LinkLocal/IPv4/Interface/Constants.pm
++++ b/lib/LinkLocal/IPv4/Interface/Constants.pm
+@@ -1,6 +1,6 @@
+ package LinkLocal::IPv4::Interface::Constants;
+ 
+-our $VERSION = '0.16';
++our $VERSION = '0.17';
+ 
+ # Copyright (C) 2010 Raymond Mroz
+ #
+diff --git a/lib/LinkLocal/IPv4/Interface/Logger.pm b/lib/LinkLocal/IPv4/Interface/Logger.pm
+index 319164c..e8d4909 100644
+--- a/lib/LinkLocal/IPv4/Interface/Logger.pm
++++ b/lib/LinkLocal/IPv4/Interface/Logger.pm
+@@ -302,7 +302,7 @@ class type.
+ Refer to RFC-3927, I<Dynamic Configuration of IPv4 Link-Local Adresses>, the complete
+ text of which can be found in the top level of the package archive.
+ 
+-L<perl>, L<Moose>, L<MooseX::Params::Validate>, L<Sys::Syslog>
++L<perl>, L<Moose>, L<MooseX::Params::Validate>, L<Sys::Syslog>, L<Try::Tiny>
+ 
+ This project is also hosted on github at:
+ 	git@github.com:raymroz/LinkLocal--IPv4.git
+diff --git a/lib/LinkLocal/IPv4/Interface/Types.pm b/lib/LinkLocal/IPv4/Interface/Types.pm
+index 2c50ca6..453de2e 100644
+--- a/lib/LinkLocal/IPv4/Interface/Types.pm
++++ b/lib/LinkLocal/IPv4/Interface/Types.pm
+@@ -1,6 +1,6 @@
+ package LinkLocal::IPv4::Interface::Types;
+ 
+-our $VERSION = '0.16';
++our $VERSION = '0.17';
+ 
+ require 5.010_000;
+ 
 
-commit 94f9fc205ede318739455e1115d90b258252e54f
-Author: Tony Li Xu <tonylixu@gmail.com>
-Date:   Tue Nov 30 21:41:33 2010 -0400
+commit b6cf37ce8f08a0aa7bcf7caf77d7fdfa215c5fd4
+Author: Ray Mroz <mroz@cpan.org>
+Date:   Sun Dec 19 15:38:22 2010 -0400
 
-    Perltidy ran on test.pl and Cache.pm
+    Added Try::Tiny exception checking to Logger.pm
 
- bin/test.pl                           |    4 +-
- lib/LinkLocal/IPv4/Interface/Cache.pm |  124 +++++++++++++++++----------------
- 2 files changed, 66 insertions(+), 62 deletions(-)
-
-commit f3991f1c4ad81dd69628dfde64d5d5d0229b132a
-Author: Tony Li Xu <tonylixu@gmail.com>
-Date:   Tue Nov 30 21:26:13 2010 -0400
-
-    Update Cache.pm and test.pl, finished functions in Cache.pn
-
- bin/test.pl                           |   19 +--
- lib/LinkLocal/IPv4/Interface/Cache.pm |  200 +++++++++++++++++++--------------
- 2 files changed, 121 insertions(+), 98 deletions(-)
-
-commit 4f91731f4b296024123e699346e8e5b3dfa153c8
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Tue Nov 30 20:47:26 2010 -0400
-
-    Cleaned up POD in several files.
-
- bin/test.pl                               |   18 +++-
- lib/LinkLocal/IPv4/Interface.pm           |   12 ++--
- lib/LinkLocal/IPv4/Interface/Cache.pm     |  135 ++++++++++++++---------------
- lib/LinkLocal/IPv4/Interface/Constants.pm |    6 +-
- lib/LinkLocal/IPv4/Interface/Types.pm     |    6 +-
- 5 files changed, 92 insertions(+), 85 deletions(-)
-
-commit 86dd443e0ec4dbaececdb9c9e02f0af0f6e59147
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Mon Nov 29 17:55:41 2010 -0400
-
-    Added Cache.pm, partially completed.
-    
-    Fixed some POD in other modules.
-
- README                                    |   86 +++++++++-
- bin/test.pl                               |   14 +-
- lib/LinkLocal/IPv4/Interface.pm           |   22 ++--
- lib/LinkLocal/IPv4/Interface/ARP.pm       |    5 +
- lib/LinkLocal/IPv4/Interface/Cache.pm     |  272 +++++++++++++++++++++++++++++
- lib/LinkLocal/IPv4/Interface/Constants.pm |   62 +++++++-
- 6 files changed, 438 insertions(+), 23 deletions(-)
-
-commit d80c95bfed728f9cca2fb9b7351bf62029e941b9
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Wed Nov 24 19:19:06 2010 -0400
-
-    Cleaned up all POD
-
- bin/test.pl                               |    4 +
- lib/LinkLocal/IPv4/Interface.pm           |  202 +++++++++++++++++++++++++++--
- lib/LinkLocal/IPv4/Interface/ARP.pm       |   88 +++++++------
- lib/LinkLocal/IPv4/Interface/Constants.pm |    2 +-
- lib/LinkLocal/IPv4/Interface/Types.pm     |   89 ++++++++-----
- 5 files changed, 300 insertions(+), 85 deletions(-)
-
-commit 2439fa2191590724f4dc5aa269201159b28da101
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Tue Nov 23 23:57:21 2010 -0400
-
-    Some small file tweaks, moved some additional modules to the Types.pm file
-
- lib/LinkLocal/IPv4/Interface.pm       |    2 --
- lib/LinkLocal/IPv4/Interface/ARP.pm   |    1 -
- lib/LinkLocal/IPv4/Interface/Types.pm |    3 +++
- 3 files changed, 3 insertions(+), 3 deletions(-)
-
-commit 04d50108724d2d1db10888bbb3d0e86caf833cbd
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Tue Nov 23 23:51:05 2010 -0400
-
-    Added ARP.pm, Types.pm.  Completed POD for both types.
-    
-    ARP.pm - this Moose class represents an object wrapper around ARP
-    packet messages which are required by the specification, specifically
-    ARP PROBE and ARP ANNOUNCE.  Please see RFC-3927 for details.
-    Types.pm - this is just a collection of shared custom types which will
-    be included in files package wide.
-
- bin/test.pl                               |   12 ++-
- lib/LinkLocal/IPv4/Interface.pm           |   29 ++----
- lib/LinkLocal/IPv4/Interface/ARP.pm       |  182 +++++++++++++++++++++++++++++
- lib/LinkLocal/IPv4/Interface/Constants.pm |   17 +++-
- lib/LinkLocal/IPv4/Interface/Types.pm     |  149 +++++++++++++++++++++++
- 5 files changed, 365 insertions(+), 24 deletions(-)
-
-commit b3a41622615816f1332e6134939bf1bf0c6caabb
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Mon Nov 22 19:28:47 2010 -0400
-
-    Removed .TextMate project file from repository
-
- LinkLocal.tmproj |   16 ----------------
- 1 files changed, 0 insertions(+), 16 deletions(-)
-
-commit 665b49c3f6af98f7f5ddb0d4e54846678cfa6e9e
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Mon Nov 22 19:27:00 2010 -0400
-
-    Removed .DS_Store OS X specific files from repository
-
- .DS_Store               |  Bin 6148 -> 0 bytes
- lib/.DS_Store           |  Bin 6148 -> 0 bytes
- lib/LinkLocal/.DS_Store |  Bin 6148 -> 0 bytes
- 3 files changed, 0 insertions(+), 0 deletions(-)
-
-commit 02f8a6fc3348218b2d2d1ad81672288444debc2f
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Mon Nov 22 00:05:53 2010 -0400
-
-    Pushing changes to reflect CPAN upload
-
- README                          |   36 ++++++++++++++++++++----------------
- lib/LinkLocal/IPv4/Interface.pm |   32 ++++++++++++++++++++------------
- rfc3927.txt                     |    6 ------
- 3 files changed, 40 insertions(+), 34 deletions(-)
-
-commit da994b999b2cd71c33acad7d11a01ea8619427fa
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Sun Nov 21 23:17:38 2010 -0400
-
-    Added copy of rfc3927 text
-
- rfc3927.txt | 1851 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 1851 insertions(+), 0 deletions(-)
-
-commit 1df0b2fbd5543c70d27c467bf15ddceb4b59b4fd
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Sun Nov 21 22:55:49 2010 -0400
-
-    Additional cleaning, preperation for CPAN
-
- bin/test.pl                     |    8 +++++++-
- lib/LinkLocal/IPv4/Interface.pm |   25 +++++++++++++------------
- 2 files changed, 20 insertions(+), 13 deletions(-)
-
-commit a92323a23dd00f217781138fc6d8aadf41255d07
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Sun Nov 21 22:03:57 2010 -0400
-
-    Cleaned up some testing cruft
-
- bin/test.pl                     |   33 +++++++++++++
- lib/LinkLocal/IPv4/Interface.pm |   95 ++++++++++++++++++++++----------------
- 2 files changed, 88 insertions(+), 40 deletions(-)
-
-commit 40e472f357a3cbcb900051236560e30ec831fff7
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Sun Nov 21 20:07:34 2010 -0400
-
-    Adjusted package path in Constants.pm
-
- lib/LinkLocal/IPv4/Interface.pm           |   28 ++++++++++++++++++----------
- lib/LinkLocal/IPv4/Interface/Constants.pm |    2 +-
- 2 files changed, 19 insertions(+), 11 deletions(-)
-
-commit c7660eddcd9754b20e27c7bdd03bab2a91b00ba8
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Sun Nov 21 20:06:00 2010 -0400
-
-    Added gpl.txt to project
-
- gpl.txt |  674 +++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
- 1 files changed, 674 insertions(+), 0 deletions(-)
-
-commit 33c230ba513655486dd8462fb8b535d877cfde84
-Author: Ray Mroz <raymondmroz@gmail.com>
-Date:   Sun Nov 21 19:23:18 2010 -0400
-
-    Added Constants.pm to project
-
- lib/LinkLocal/IPv4/Interface/Constants.pm |   53 +++++++++++++++++++++++++++++
- 1 files changed, 53 insertions(+), 0 deletions(-)
-
-commit 4f738c4c5812f768b81de7a540899e449b564d89
-Author: Raymond Mroz <rmroz@Mac-Mini.local>
-Date:   Sun Nov 21 19:14:16 2010 -0400
-
-    Initial commit of project to place under git control
-
- .DS_Store                       |  Bin 0 -> 6148 bytes
- Changes                         |    6 ++
- LinkLocal.tmproj                |   16 ++++
- MANIFEST                        |    6 ++
- Makefile.PL                     |   12 +++
- README                          |   40 +++++++++
- lib/.DS_Store                   |  Bin 0 -> 6148 bytes
- lib/LinkLocal/.DS_Store         |  Bin 0 -> 6148 bytes
- lib/LinkLocal/IPv4/Interface.pm |  179 +++++++++++++++++++++++++++++++++++++++
- t/LinkLocal-IPv4-Interface.t    |   18 ++++
- 10 files changed, 277 insertions(+), 0 deletions(-)
+diff --git a/Makefile.PL b/Makefile.PL
+index 48fcc1f..74b8542 100644
+--- a/Makefile.PL
++++ b/Makefile.PL
+@@ -6,7 +6,7 @@ use ExtUtils::MakeMaker;
+ 
+ WriteMakefile(
+     'NAME'           => 'LinkLocal::IPv4::Interface',
+-    'VERSION_FROM'   => 'lib/LinkLocal/IPv4/Interface.pm',    # finds $VERSION
++    'VERSION_FROM'   => 'lib/LinkLocal/IPv4/Interface.pm',
+     'BUILD_REQUIRES' => {
+         'FindBin'          => '0',
+         'Moose::Role'      => '0',
+diff --git a/README b/README
+index 5097488..46b94a6 100644
+--- a/README
++++ b/README
+@@ -1,4 +1,4 @@
+-LinkLocal-IPv4-Interface version 0.15
++LinkLocal-IPv4-Interface version 0.16
+ =====================================
+ 
+ This package represents a lightweight, pure Perl implementation of the specification
+diff --git a/lib/LinkLocal/IPv4/Interface/Logger.pm b/lib/LinkLocal/IPv4/Interface/Logger.pm
+index 2777e70..319164c 100644
+--- a/lib/LinkLocal/IPv4/Interface/Logger.pm
++++ b/lib/LinkLocal/IPv4/Interface/Logger.pm
+@@ -4,10 +4,26 @@ our $VERSION = '0.16';
+ 
+ require 5.010_000;
+ 
++# Copyright (C) 2010 Raymond Mroz, Tony Li Xu
++#
++# This program is free software: you can redistribute it and/or modify
++# it under the terms of the GNU General Public License as published by
++# the Free Software Foundation, either version 3 of the License, or
++# (at your option) any later version.
++#
++# This program is distributed in the hope that it will be useful,
++# but WITHOUT ANY WARRANTY; without even the implied warranty of
++# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++# GNU General Public License for more details.
++#
++# You should have received a copy of the GNU General Public License
++# along with this program.  If not, see <http://www.gnu.org/licenses/>.
++
+ use LinkLocal::IPv4::Interface::Types;
+-use Sys::Syslog qw/ :standard :macros /;
+ use Moose;
+ use MooseX::Params::Validate;
++use Try::Tiny;
++use Sys::Syslog qw/ :standard :macros /;
+ 
+ use feature ':5.10';
+ 
+@@ -56,75 +72,130 @@ sub open_log {
+         facility => { isa => 'Str', optional => 1, default => 'user' }
+     );
+ 
+-    openlog( $params{indent}, $params{options}, $params{facility} );
++    try {
++        openlog( $params{indent}, $params{options}, $params{facility} );
++    }
++    catch {
++        die "Unable to open syslog instance for writing: $!";
++    };
+ }
+ 
+ sub _set_log_mask {
+     my $this = shift;
+ 
+-    setlogmask( ~( &Sys::Syslog::LOG_MASK(NOTICE) ) );
++    try {
++        setlogmask( ~( &Sys::Syslog::LOG_MASK(NOTICE) ) );
++    }
++    catch {
++        die "Error while setting log mask: $!";
++    };
+ }
+ 
+ sub emerg {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'emerg', "%8s: %s", "Emerg", $message );
++    try {
++        syslog( 'emerg', "%8s: %s", "Emerg", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub alert {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'alert', "%8s: %s", "Alert", $message );
++    try {
++        syslog( 'alert', "%8s: %s", "Alert", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub critical {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'crit', "%8s: %s", "Critical", $message );
++    try {
++        syslog( 'crit', "%8s: %s", "Critical", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub error {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'err', "%8s: %s", "Error", $message );
++    try {
++        syslog( 'err', "%8s: %s", "Error", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub warning {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'warning', "%8s: %s", "Warning", $message );
++    try {
++        syslog( 'warning', "%8s: %s", "Warning", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub notice {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'notice', "%8s: %s", "Notice", $message );
++    try {
++        syslog( 'notice', "%8s: %s", "Notice", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub info {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'info', "%8s: %s", "Info", $message );
++    try {
++        syslog( 'info', "%8s: %s", "Info", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub debug {
+     my $this = shift;
+     my ($message) = pos_validated_list( \@_, { isa => 'Str' } );
+ 
+-    syslog( 'debug', "%8s: %s", "Debug", $message );
++    try {
++        syslog( 'debug', "%8s: %s", "Debug", $message );
++    }
++    catch {
++        die "Error while writing to syslog: $!";
++    };
+ }
+ 
+ sub close_log {
+     my $this = shift;
+ 
+-    closelog();
++    try {
++        closelog();
++    }
++    catch {
++        die "Error while closing syslog: $!";
++    };
+ }
+ 
+ no Moose;
