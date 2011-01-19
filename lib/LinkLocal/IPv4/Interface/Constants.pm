@@ -1,6 +1,6 @@
 package LinkLocal::IPv4::Interface::Constants;
 
-our $VERSION = '0.17';
+our $VERSION = '0.19_01';
 
 # Copyright (C) 2010 Raymond Mroz
 #

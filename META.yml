@@ -1,0 +1,40 @@
+--- #YAML:1.0
+name:               LinkLocal-IPv4-Interface
+version:            0.19_01
+abstract:           IPv4 link-local interface wrapper
+author:
+    - Ray Mroz <mroz@cpan.org>
+license:            perl
+distribution_type:  module
+configure_requires:
+    ExtUtils::MakeMaker:  0
+build_requires:
+    attributes:        0
+    FindBin:           0
+    metaclass:         0
+    Moose::Role:       0
+    namespace::clean:  0
+    Test::Exception:   0
+    Test::Moose:       0
+    Test::More:        0.89
+    Test::Pod:         0
+requires:
+    IO::File:             0.14
+    IO::Interface::Simple:  0
+    Moose:                1.20
+    Moose::Util::TypeConstraints:  0
+    MooseX::Params::Validate:  0.15
+    Net::Frame::Layer::ARP:  0
+    Regexp::Common:       2010010201
+    Sys::Syslog:          0.27
+    Try::Tiny:            0.09
+resources:
+    repository:  git://github.com/raymroz/LinkLocal--IPv4.git
+no_index:
+    directory:
+        - t
+        - inc
+generated_by:       ExtUtils::MakeMaker version 6.56
+meta-spec:
+    url:      http://module-build.sourceforge.net/META-spec-v1.4.html
+    version:  1.4

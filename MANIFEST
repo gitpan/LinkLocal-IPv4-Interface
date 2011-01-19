@@ -11,3 +11,4 @@ lib/LinkLocal/IPv4/Interface/Cache.pm
 lib/LinkLocal/IPv4/Interface/Constants.pm
 lib/LinkLocal/IPv4/Interface/Logger.pm
 lib/LinkLocal/IPv4/Interface/Types.pm
+META.yml                                 Module meta-data (added by MakeMaker)

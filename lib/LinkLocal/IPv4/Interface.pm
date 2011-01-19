@@ -1,6 +1,6 @@
 package LinkLocal::IPv4::Interface;
 
-our $VERSION = '0.17';
+our $VERSION = '0.19_01';
 
 require 5.010_000;
 
@@ -339,7 +339,6 @@ state.
 	MAX_CONFLICTS       => 10
 	RATE_LIMIT_INTERVAL => 60 seconds
 	DEFEND_INTERVAL     => 10 seconds
-
 
 =head1 SEE ALSO
 

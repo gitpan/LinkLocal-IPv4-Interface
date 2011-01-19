@@ -38,4 +38,10 @@ WriteMakefile(
           )
         : ()
     ),
+    LICENSE => 'perl',
+    META_MERGE => {
+        resources => {
+            repository => 'git://github.com/raymroz/LinkLocal--IPv4.git',
+        },
+    },
 );
